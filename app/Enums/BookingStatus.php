@@ -18,4 +18,13 @@ enum BookingStatus
             BookingStatus::CANCELED->name,
         ];
     }
+
+    public static function from(string $status): BookingStatus
+    {
+        return match (strtoupper($status)) {
+            BookingStatus::PENDING->name => BookingStatus::PENDING,
+            BookingStatus::ACCEPTED->name => BookingStatus::ACCEPTED,
+            default => throw new \RuntimeException("Unknown status: $status"),
+        };
+    }
 }

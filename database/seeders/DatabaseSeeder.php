@@ -13,11 +13,24 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        User::factory()->admin()->active()->create([
+            'name' => 'Admin active',
+            'email' => 'admin@example.com',
+        ]);
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        User::factory()->admin()->deactivated()->create([
+            'name' => 'Admin',
+            'email' => 'admin-deactivated@example.com',
+        ]);
+
+        User::factory()->standard()->active()->create([
+            'name' => 'Admin',
+            'email' => 'standard@example.com',
+        ]);
+
+        User::factory()->standard()->deactivated()->create([
+            'name' => 'Admin',
+            'email' => 'standard-deactivated@example.com',
         ]);
     }
 }

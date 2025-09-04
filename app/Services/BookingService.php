@@ -5,19 +5,24 @@ namespace App\Services;
 use App\Dto\Booking as BookingDto;
 use App\Enums\BookingStatus;
 use App\Mail\AdminApprovalRequestMail;
+use App\Mail\GuestBookingAcceptedMail;
+use App\Mail\GuestBookingDeclinedMail;
 use App\Models\Booking;
 use App\Services\Contracts\BookingService as BookingServiceContract;
+use App\Services\Contracts\GoogleCalendarService;
 use App\Services\Contracts\UserService;
 use DateTimeInterface;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
+use Throwable;
 
 class BookingService implements BookingServiceContract
 {
     public function __construct(
         private readonly UserService $userService,
+        private readonly GoogleCalendarService $googleCalendarService
     ) {}
 
     /**
@@ -48,7 +53,6 @@ class BookingService implements BookingServiceContract
     public function store(BookingDto $dto): Booking
     {
         return DB::transaction(function () use ($dto) {
-
             $booking = new Booking;
             $booking->fill([
                 ...$dto->toArray(),
@@ -69,6 +73,50 @@ class BookingService implements BookingServiceContract
                 );
             });
         });
+    }
+
+    public function accept(Booking $booking): Booking
+    {
+        $booking->fill(['status' => BookingStatus::ACCEPTED]);
+        $booking->save();
+
+        try {
+            $eventId = $this->googleCalendarService->createEvent($booking);
+            $booking->forceFill(['google_event_id' => $eventId])->save();
+        } catch (Throwable $e) {
+            report($e);
+        }
+
+        // Email the guest (queued)
+        Mail::to($booking->guest_email)->queue(
+            (new GuestBookingAcceptedMail($booking /* , $icsPath if you add it here */))
+                ->onQueue('booking-email')
+                ->afterCommit()
+        );
+
+        return $booking;
+    }
+
+    public function decline(Booking $booking, mixed $validated): Booking
+    {
+        $booking->status = BookingStatus::DECLINED;
+        $booking->admin_comment = $validated['admin_comment'];
+        $booking->save();
+
+        try {
+            $this->googleCalendarService->deleteEvent($booking->google_event_id);
+        } catch (Throwable $e) {
+            report($e);
+        }
+
+        // Email the guest (queued)
+        Mail::to($booking->guest_email)->queue(
+            (new GuestBookingDeclinedMail($booking))
+                ->onQueue('booking-email')
+                ->afterCommit()
+        );
+
+        return $booking;
     }
 
     protected function createToken(): string

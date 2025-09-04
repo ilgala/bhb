@@ -11,4 +11,8 @@ interface BookingService
     public function bookingExists(DateTimeInterface $startAt, DateTimeInterface $endAt): bool;
 
     public function store(BookingDto $dto): Booking;
+
+    public function accept(Booking $booking): Booking;
+
+    public function decline(Booking $booking, mixed $validated): Booking;
 }

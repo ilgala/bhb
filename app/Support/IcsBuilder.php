@@ -31,16 +31,16 @@ class IcsBuilder
             $this->prop('DESCRIPTION', $this->description($b)),
             $this->prop('LOCATION', config('bhb.location', 'Beach House')),
             // Organizer & Attendee are optional but nice to have
-            $this->prop('ORGANIZER;CN=' . $this->escape(config('mail.from.name', 'BHB')), 'MAILTO:' . config('mail.from.address')),
-            $this->prop('ATTENDEE;CN=' . $this->escape($b->guest_name) . ';ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED', 'MAILTO:' . $b->guest_email),
+            $this->prop('ORGANIZER;CN='.$this->escape(config('mail.from.name', 'BHB')), 'MAILTO:'.config('mail.from.address')),
+            $this->prop('ATTENDEE;CN='.$this->escape($b->guest_name).';ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED', 'MAILTO:'.$b->guest_email),
             'END:VEVENT',
             'END:VCALENDAR',
         ];
 
         // Fold long lines to 75 octets per RFC 5545
-        $payload = implode("\r\n", array_map([$this, 'fold'], $lines)) . "\r\n";
+        $payload = implode("\r\n", array_map([$this, 'fold'], $lines))."\r\n";
 
-        $path = storage_path('app/ics/' . $b->getKey() . '.ics');
+        $path = storage_path('app/ics/'.$b->getKey().'.ics');
         File::ensureDirectoryExists(dirname($path));
         File::put($path, $payload);
 
@@ -54,6 +54,7 @@ class IcsBuilder
         // This version derives one deterministically from id + created_at.
         $host = parse_url(config('app.url'), PHP_URL_HOST) ?: 'bhb.local';
         $hash = Str::uuid()->toString(); // change to deterministic if desired
+
         return "bhb-{$b->getKey()}-{$hash}@{$host}";
     }
 
@@ -61,8 +62,8 @@ class IcsBuilder
     protected function escape(string $text): string
     {
         return str_replace(
-            ["\\", ";", ",", "\n", "\r"],
-            ["\\\\", "\;", "\,", "\\n", ""],
+            ['\\', ';', ',', "\n", "\r"],
+            ['\\\\', "\;", "\,", '\\n', ''],
             $text
         );
     }
@@ -70,24 +71,25 @@ class IcsBuilder
     /** Create a property line "NAME:VALUE" with value escaped. */
     protected function prop(string $name, string $value): string
     {
-        return $name . ':' . $this->escape($value);
+        return $name.':'.$this->escape($value);
     }
 
     /** Human-friendly multi-line description. */
     protected function description(Booking $b): string
     {
         $parts = [
-            'Guest: ' . $b->guest_name,
-            'Guests: ' . $b->guests_count,
-            'Email: ' . $b->guest_email,
+            'Guest: '.$b->guest_name,
+            'Guests: '.$b->guests_count,
+            'Email: '.$b->guest_email,
         ];
         if ($b->guest_phone) {
-            $parts[] = 'Phone: ' . $b->guest_phone;
+            $parts[] = 'Phone: '.$b->guest_phone;
         }
         if ($b->notes) {
             $parts[] = '';
-            $parts[] = 'Notes: ' . $b->notes;
+            $parts[] = 'Notes: '.$b->notes;
         }
+
         return implode("\n", $parts);
     }
 
@@ -106,11 +108,12 @@ class IcsBuilder
             $bytes += strlen($char); // 1 here, but keep semantics clear
 
             if ($bytes >= 75) {
-                $result .= $chunk . "\r\n" . ' ';
+                $result .= $chunk."\r\n".' ';
                 $chunk = '';
                 $bytes = 0;
             }
         }
-        return $result . $chunk;
+
+        return $result.$chunk;
     }
 }

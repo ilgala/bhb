@@ -2,6 +2,8 @@
 
 namespace App\Livewire\Auth;
 
+use App\Enums\UserRole;
+use App\Enums\UserStatus;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
@@ -11,6 +13,7 @@ use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
+use Symfony\Component\HttpFoundation\Response;
 
 #[Layout('components.layouts.auth')]
 class Login extends Component
@@ -38,6 +41,17 @@ class Login extends Component
             throw ValidationException::withMessages([
                 'email' => __('auth.failed'),
             ]);
+        }
+
+        $user = Auth::user();
+        if ($user->status === UserStatus::DEACTIVATED) {
+            throw ValidationException::withMessages([
+                'email' => __('auth.deactivated'),
+            ]);
+        }
+
+        if ($user->role === UserRole::STANDARD) {
+            abort(Response::HTTP_FORBIDDEN, 'You\'re not allowed to access this page.');
         }
 
         RateLimiter::clear($this->throttleKey());

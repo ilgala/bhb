@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ApprovalController;
+use App\Livewire\AdminCalendar;
 use App\Livewire\Availability;
 use App\Livewire\BookingForm;
 use App\Livewire\Settings\Appearance;
@@ -25,17 +26,20 @@ Route::middleware(['auth'])->group(function () {
     Route::get('settings/password', Password::class)->name('settings.password');
     Route::get('settings/appearance', Appearance::class)->name('settings.appearance');
 
-    // Route::prefix('admin')->middleware(['auth','verified','admin'])->group(function () {
-    //    Route::get('/calendar', AdminCalendar::class)->name('admin.calendar');
-    //    Route::get('/bookings/{booking}', BookingShow::class)->name('admin.bookings.show');
-    //    // Users CRUD (invite/revoke/deactivate)
-    // });
+    Route::prefix('admin')
+        ->middleware(['auth', 'verified'])
+        ->can('only-admin')
+        ->group(function () {
+        Route::get('/calendar', AdminCalendar::class)->name('admin.calendar');
+        // Route::get('/bookings/{booking}', BookingShow::class)->name('admin.bookings.show');
+        // Users CRUD (invite/revoke/deactivate)
+    });
 });
 
 require __DIR__.'/auth.php';
 
 Route::middleware('signed')->group(function () {
-   Route::get('/approve/{booking:approval_token}', [ApprovalController::class, 'show'])->name('approve.show');
+    Route::get('/approve/{booking:approval_token}', [ApprovalController::class, 'show'])->name('approve.show');
 });
 
 Route::post('/approve/{booking}/accept', [ApprovalController::class, 'accept'])->name('approve.accept');
