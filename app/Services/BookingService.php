@@ -42,11 +42,11 @@ class BookingService implements BookingServiceContract
             ->whereIn('status', [BookingStatus::PENDING, BookingStatus::ACCEPTED])
             ->where(function ($query) use ($startAt, $endAt) {
                 $query->whereBetween('start_at', [$startAt, $endAt])            // start inside requested window
-                ->orWhereBetween('end_at', [$startAt, $endAt])                  // end inside requested window
-                ->orWhere(function ($query) use ($startAt, $endAt) {            // existing fully wraps requested
-                    $query->where('start_at', '<=', $startAt)
-                        ->where('end_at', '>=', $endAt);
-                });
+                    ->orWhereBetween('end_at', [$startAt, $endAt])                  // end inside requested window
+                    ->orWhere(function ($query) use ($startAt, $endAt) {            // existing fully wraps requested
+                        $query->where('start_at', '<=', $startAt)
+                            ->where('end_at', '>=', $endAt);
+                    });
             })
             ->exists();
     }

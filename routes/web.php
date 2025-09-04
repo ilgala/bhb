@@ -30,10 +30,10 @@ Route::middleware(['auth'])->group(function () {
         ->middleware(['auth', 'verified'])
         ->can('only-admin')
         ->group(function () {
-        Route::get('/calendar', AdminCalendar::class)->name('admin.calendar');
-        // Route::get('/bookings/{booking}', BookingShow::class)->name('admin.bookings.show');
-        // Users CRUD (invite/revoke/deactivate)
-    });
+            Route::get('/calendar', AdminCalendar::class)->name('admin.calendar');
+            // Route::get('/bookings/{booking}', BookingShow::class)->name('admin.bookings.show');
+            // Users CRUD (invite/revoke/deactivate)
+        });
 });
 
 require __DIR__.'/auth.php';

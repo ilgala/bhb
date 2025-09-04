@@ -5,13 +5,11 @@ namespace App\Livewire;
 use App\Enums\BookingStatus;
 use App\Models\Booking;
 use App\Services\Contracts\BookingService;
-use App\Services\GoogleCalendarService;
 use Carbon\Carbon;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Mail;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -27,7 +25,7 @@ class AdminCalendar extends Component
 
     public ?string $dateStart = null;
 
-    public ?string $dateEnd   = null;
+    public ?string $dateEnd = null;
 
     public ?string $adminComment = null;
 
@@ -131,6 +129,7 @@ class AdminCalendar extends Component
         $booking = Booking::findOrFail($bookingId);
         if ($booking->status !== BookingStatus::ACCEPTED) {
             session()->flash('ok', 'Only accepted bookings can be canceled.');
+
             return;
         }
 
