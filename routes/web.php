@@ -34,10 +34,10 @@ Route::middleware(['auth'])->group(function () {
 
 require __DIR__.'/auth.php';
 
-// Route::middleware('signed')->group(function () {
-//    Route::get('/approve/{booking:approval_token}', [ApprovalController::class, 'show'])->name('approve.show');
-// });
-//
-// Route::post('/approve/{booking}/accept', [ApprovalController::class, 'accept'])->name('approve.accept');
-//
-// Route::post('/approve/{booking}/decline', [ApprovalController::class, 'decline'])->name('approve.decline');
+Route::middleware('signed')->group(function () {
+   Route::get('/approve/{booking:approval_token}', [ApprovalController::class, 'show'])->name('approve.show');
+});
+
+Route::post('/approve/{booking}/accept', [ApprovalController::class, 'accept'])->name('approve.accept');
+
+Route::post('/approve/{booking}/decline', [ApprovalController::class, 'decline'])->name('approve.decline');
