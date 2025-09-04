@@ -1,13 +1,18 @@
 <?php
 
+use App\Http\Controllers\ApprovalController;
+use App\Livewire\Availability;
+use App\Livewire\BookingForm;
 use App\Livewire\Settings\Appearance;
 use App\Livewire\Settings\Password;
 use App\Livewire\Settings\Profile;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-})->name('home');
+Route::get('/', Availability::class)
+    ->name('availability');
+
+Route::get('/book', BookingForm::class)
+    ->name('book');
 
 Route::view('dashboard', 'dashboard')
     ->middleware(['auth', 'verified'])
@@ -20,24 +25,19 @@ Route::middleware(['auth'])->group(function () {
     Route::get('settings/password', Password::class)->name('settings.password');
     Route::get('settings/appearance', Appearance::class)->name('settings.appearance');
 
-
-    //Route::prefix('admin')->middleware(['auth','verified','admin'])->group(function () {
+    // Route::prefix('admin')->middleware(['auth','verified','admin'])->group(function () {
     //    Route::get('/calendar', AdminCalendar::class)->name('admin.calendar');
     //    Route::get('/bookings/{booking}', BookingShow::class)->name('admin.bookings.show');
     //    // Users CRUD (invite/revoke/deactivate)
-    //});
+    // });
 });
 
 require __DIR__.'/auth.php';
 
-//Route::get('/', Availability::class);
+// Route::middleware('signed')->group(function () {
+//    Route::get('/approve/{booking:approval_token}', [ApprovalController::class, 'show'])->name('approve.show');
+// });
 //
-//Route::get('/book', BookingForm::class);
+// Route::post('/approve/{booking}/accept', [ApprovalController::class, 'accept'])->name('approve.accept');
 //
-//Route::middleware('signed')->group(function () {
-//    Route::get('/approve/{booking}', [ApprovalController::class, 'show'])->name('approve.show');
-//});
-//
-//Route::post('/approve/{booking}/accept', [ApprovalController::class, 'accept'])->name('approve.accept');
-//
-//Route::post('/approve/{booking}/decline', [ApprovalController::class, 'decline'])->name('approve.decline');
+// Route::post('/approve/{booking}/decline', [ApprovalController::class, 'decline'])->name('approve.decline');

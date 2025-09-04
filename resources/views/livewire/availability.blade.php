@@ -1,44 +1,3 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-    <title>{{ $title ?? config('app.name') }}</title>
-
-    <link rel="icon" href="/favicon.ico" sizes="any">
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
-
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-</head>
-<body class="h-full bg-white text-slate-800 antialiased dark:bg-slate-950 dark:text-slate-100">
-<a href="#availability" class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 bg-amber-100 text-amber-900 px-3 py-1 rounded">
-    Skip to availability
-</a>
-
-<!-- ====== Site Header / Nav ====== -->
-<header class="border-b border-slate-200/70 dark:border-slate-800 bg-white/75 backdrop-blur supports-[backdrop-filter]:bg-white/60 dark:bg-slate-950/60">
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div class="h-16 flex items-center justify-between">
-            <!-- Logo (text only) -->
-            <a href="/" class="font-semibold tracking-tight text-lg sm:text-xl">
-                Beach House
-            </a>
-
-            <!-- Nav -->
-            <nav aria-label="Primary" class="flex items-center gap-6 text-sm font-medium">
-                <a href="/#availability" class="text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white">Availability</a>
-                <a href="/book" class="text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white">Booking</a>
-                <a href="/login" class="text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white">Log in</a>
-            </nav>
-        </div>
-    </div>
-</header>
-
 <main>
     <!-- ====== Section 1: Hero (full page on md+, compact on mobile) ====== -->
     <section class="relative">
@@ -58,7 +17,7 @@
                        class="inline-flex items-center justify-center rounded-lg bg-emerald-600 px-4 py-2.5 text-white font-medium shadow hover:bg-emerald-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500">
                         Check Availability
                     </a>
-                    <a href="/book"
+                    <a href="{{ route('book') }}"
                        class="inline-flex items-center justify-center rounded-lg border border-slate-300 px-4 py-2.5 text-slate-700 font-medium hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800">
                         Book Now
                     </a>
@@ -169,7 +128,7 @@
                     Submit your request in a minute. We’ll review and send you a signed approval link with all the details.
                 </p>
                 <div class="mt-6">
-                    <a href="/book"
+                    <a href="{{ route('book') }}"
                        class="inline-flex items-center justify-center rounded-xl bg-white px-5 py-3 font-semibold text-emerald-700 shadow hover:shadow-md hover:bg-emerald-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70">
                         Go to Booking
                     </a>
@@ -178,10 +137,3 @@
         </div>
     </section>
 </main>
-
-<!-- ====== Footer ====== -->
-<footer class="border-t border-slate-200/70 py-6 text-center text-sm text-slate-500 dark:border-slate-800 dark:text-slate-400">
-    made with ❤️ and AI — TheGalaDev for MalcaCorp — © 2025
-</footer>
-</body>
-</html>
