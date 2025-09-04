@@ -10,12 +10,13 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class AdminApprovalRequestMail extends Mailable implements ShouldQueue
+class GuestBookingCanceledMail extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
-    public function __construct(public Booking $booking, public string $approvalUrl)
-    {
+    public function __construct(
+        public Booking $booking
+    ) {
         $this->onQueue('booking-mail');
         $this->afterCommit();
     }
@@ -23,17 +24,16 @@ class AdminApprovalRequestMail extends Mailable implements ShouldQueue
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'New Beach House booking request – approval needed',
+            subject: 'Your Beach House booking has been canceled'
         );
     }
 
     public function content(): Content
     {
         return new Content(
-            markdown: 'emails.admin.approval-request',
+            markdown: 'emails.guest.canceled',
             with: [
                 'booking' => $this->booking,
-                'approvalUrl' => $this->approvalUrl,
             ]
         );
     }

@@ -4,10 +4,14 @@ namespace App\Livewire;
 
 use App\Enums\BookingStatus;
 use App\Models\Booking;
+use App\Services\Contracts\BookingService;
 use App\Services\GoogleCalendarService;
+use Carbon\Carbon;
+use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -15,14 +19,17 @@ class AdminCalendar extends Component
 {
     use WithPagination;
 
-    public string $viewMode = 'daily';     // daily|weekly|monthly (UI only for now)
+    public string $viewMode = 'daily';
 
-    public string $status = 'pending';   // pending|accepted|declined|canceled|all
+    public string $status = 'pending';
 
+    public ?string $selectedId = null;
 
-    public Booking|null $selectedBooking = null;
+    public ?string $dateStart = null;
 
-    public ?string $admin_comment = null;
+    public ?string $dateEnd   = null;
+
+    public ?string $adminComment = null;
 
     public function render(): View
     {
@@ -39,7 +46,7 @@ class AdminCalendar extends Component
 
     public function select(Booking $booking): void
     {
-        $this->selectedBooking = $booking;
+        $this->selectedId = $booking;
     }
 
     public function getSelectedBookingProperty(): ?Booking
@@ -51,17 +58,37 @@ class AdminCalendar extends Component
 
     public function getBookingsProperty(): LengthAwarePaginator
     {
-        $q = Booking::query()->latest('start_at');
+        $query = Booking::query()->latest('start_at');
 
         if ($this->status !== 'all') {
-            $q->where('status', BookingStatus::from($this->status));
+            $query->where('status', BookingStatus::from($this->status));
         }
 
-        return $q->paginate(8);
+        if ($this->dateStart || $this->dateEnd) {
+            $start = $this->dateStart
+                ? Carbon::parse($this->dateStart)->startOfDay()
+                : null;
+
+            $end = $this->dateEnd
+                ? Carbon::parse($this->dateEnd)->endOfDay()
+                : null;
+
+            $query->where(function (Builder $subQuery) use ($start, $end) {
+                if ($start) {
+                    $subQuery->where('start_at', '<', $end);
+                }
+                if ($end) {
+                    $subQuery->where('end_at', '>', $start);
+                }
+            });
+        }
+
+        return $query->paginate(8);
     }
 
-    public function approve(Booking $booking, GoogleCalendarService $google): void
+    public function approve(string $bookingId, BookingService $bookingService): void
     {
+        $booking = Booking::findOrFail($bookingId);
         if ($booking->status === BookingStatus::ACCEPTED) {
             session()->flash('ok', 'This booking was already accepted.');
         } elseif ($booking->status === BookingStatus::DECLINED) {
@@ -70,15 +97,16 @@ class AdminCalendar extends Component
             session()->flash('ok', 'Booking is not pending anymore.');
         }
 
-        DB::transaction(function () use ($booking) {
-            $this->bookingService->accept($booking);
+        DB::transaction(function () use ($booking, $bookingService) {
+            $bookingService->accept($booking);
         });
 
         session()->flash('ok', 'Booking accepted. Guest will be notified.');
     }
 
-    public function decline(Booking $booking): void
+    public function decline(string $bookingId, BookingService $bookingService): void
     {
+        $booking = Booking::findOrFail($bookingId);
         if ($booking->status === BookingStatus::ACCEPTED) {
             session()->flash('ok', 'This booking was already accepted.');
         } elseif ($booking->status === BookingStatus::DECLINED) {
@@ -87,14 +115,28 @@ class AdminCalendar extends Component
             session()->flash('ok', 'Booking is not pending anymore.');
         }
 
-        DB::transaction(function () use ($booking) {
-            $this->bookingService->decline($booking, [
-                'admin_comment' => $this->admin_comment,
+        DB::transaction(function () use ($booking, $bookingService) {
+            $bookingService->decline($booking, [
+                'admin_comment' => $this->adminComment,
             ]);
         });
 
-        $this->admin_comment = null;
+        $this->adminComment = null;
         session()->flash('ok', 'Booking declined. Guest will be notified.');
+        $this->dispatch('$refresh');
+    }
+
+    public function cancel(string $bookingId, BookingService $bookingService): void
+    {
+        $booking = Booking::findOrFail($bookingId);
+        if ($booking->status !== BookingStatus::ACCEPTED) {
+            session()->flash('ok', 'Only accepted bookings can be canceled.');
+            return;
+        }
+
+        $bookingService->cancel($booking);
+
+        session()->flash('ok', 'Booking canceled. Guest will be notified.');
         $this->dispatch('$refresh');
     }
 }

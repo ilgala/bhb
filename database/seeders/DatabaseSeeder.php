@@ -32,5 +32,7 @@ class DatabaseSeeder extends Seeder
             'name' => 'Admin',
             'email' => 'standard-deactivated@example.com',
         ]);
+
+        $this->call(BookingSeeder::class);
     }
 }

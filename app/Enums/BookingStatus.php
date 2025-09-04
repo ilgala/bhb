@@ -24,6 +24,8 @@ enum BookingStatus
         return match (strtoupper($status)) {
             BookingStatus::PENDING->name => BookingStatus::PENDING,
             BookingStatus::ACCEPTED->name => BookingStatus::ACCEPTED,
+            BookingStatus::DECLINED->name => BookingStatus::DECLINED,
+            BookingStatus::CANCELED->name => BookingStatus::CANCELED,
             default => throw new \RuntimeException("Unknown status: $status"),
         };
     }

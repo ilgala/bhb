@@ -14,5 +14,7 @@ interface BookingService
 
     public function accept(Booking $booking): Booking;
 
-    public function decline(Booking $booking, mixed $validated): Booking;
+    public function decline(Booking $booking, array $data): Booking;
+
+    public function cancel(Booking $booking): Booking;
 }

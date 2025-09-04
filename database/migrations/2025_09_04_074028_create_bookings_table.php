@@ -19,7 +19,7 @@ return new class extends Migration
             $table->dateTime('end_at');
             $table->string('guest_name');
             $table->string('guest_email');
-            $table->string('guest_phone');
+            $table->string('guest_phone')->nullable();
             $table->tinyInteger('guests_count');
             $table->enum('status', BookingStatus::values());
             $table->text('notes')->nullable();
