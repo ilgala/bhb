@@ -12,6 +12,8 @@ use App\Models\Booking;
 use App\Services\Contracts\BookingService as BookingServiceContract;
 use App\Services\Contracts\GoogleCalendarService;
 use App\Services\Contracts\UserService;
+use App\Support\Audit;
+use Auth;
 use DateTimeInterface;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
@@ -72,6 +74,11 @@ class BookingService implements BookingServiceContract
                         ->onQueue('booking-email')  // optional
                         ->afterCommit()                   // already declared in the constructor
                 );
+
+                Audit::record($booking, 'create', [
+                    'status' => strtolower($booking->status->name),
+                    'guests' => $booking->guests_count,
+                ]);
             });
         });
     }
@@ -94,6 +101,11 @@ class BookingService implements BookingServiceContract
                     ->afterCommit()
             );
 
+            Audit::record($booking, 'approve', [
+                'previous_status' => 'pending',
+                'google_event_id' => $booking->google_event_id,
+            ], Auth::id());
+
             return $booking;
         });
     }
@@ -115,6 +127,11 @@ class BookingService implements BookingServiceContract
                     ->afterCommit()
             );
 
+            Audit::record($booking, 'decline', [
+                'previous_status' => 'pending',
+                'reason' => $booking->admin_comment,
+            ], Auth::id());
+
             return $booking;
         });
     }
@@ -135,6 +152,10 @@ class BookingService implements BookingServiceContract
                     ->onQueue('booking-email')
                     ->afterCommit()
             );
+
+            Audit::record($booking, 'cancel', [
+                'previous_status' => 'accepted',
+            ], Auth::id());
 
             return $booking;
         });

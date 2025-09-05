@@ -1,6 +1,5 @@
 <?php
 
-use App\Enums\AuditStatus;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -15,12 +14,13 @@ return new class extends Migration
         Schema::create('audit_logs', function (Blueprint $table) {
             $table->ulid('id')->primary();
 
-            $table->foreignUlid('user_id')->constrained()->cascadeOnDelete();
-            $table->foreignUlid('booking_id')->constrained()->cascadeOnDelete();
-            $table->enum('action', AuditStatus::values());
-            $table->json('metadata');
+            $table->ulidMorphs('auditable');        // auditable_type + auditable_id (use Booking as primary target)
+            $table->foreignUlid('user_id')->nullable()->constrained()->nullOnDelete();
+            $table->string('action', 50);           // approve|decline|cancel|create|update|invite|role_change...
+            $table->json('metadata')->nullable();   // reason, diffs, previous_status, ip, ua...
 
             $table->timestamps();
+            $table->index(['auditable_type', 'auditable_id', 'created_at']);
         });
     }
 

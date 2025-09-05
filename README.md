@@ -52,8 +52,6 @@ MAIL_HOST=mailpit
 MAIL_PORT=1025
 MAIL_FROM_ADDRESS="noreply@bhb.local"
 MAIL_FROM_NAME="BHB"
-
-ADMIN_APPROVAL_EMAIL=owner@example.com
 ```
 
 ### 4. Migrate & seed
@@ -114,8 +112,6 @@ SESSION_DRIVER=file
 MAIL_MAILER=log
 MAIL_FROM_ADDRESS="noreply@bhb.local"
 MAIL_FROM_NAME="BHB"
-
-ADMIN_APPROVAL_EMAIL=owner@example.com
 ```
 
 ### 3. Database & queue tables
@@ -158,6 +154,5 @@ npm run dev
 
 ## Notes
 
-- **Admin recipients:** configure `ADMIN_APPROVAL_EMAIL` as fallback.
 - **Queues:** booking-mail (admin + guest mails), calendar (Google events), mail (other mails), default (rest).
 - **Google Calendar:** leave env unset if not testing that part.

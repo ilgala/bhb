@@ -42,16 +42,18 @@ class AdminCalendar extends Component
         $this->resetPage();
     }
 
-    public function select(Booking $booking): void
+    public function select(string $booking): void
     {
         $this->selectedId = $booking;
     }
 
     public function getSelectedBookingProperty(): ?Booking
     {
-        return $this->selectedId
-            ? Booking::find($this->selectedId)
-            : ($this->bookings->first() ?: null);
+        $id = $this->selectedId ?? optional($this->bookings->first())->id;
+
+        return $id
+            ? Booking::with(['audits.user'])->find($id)
+            : null;
     }
 
     public function getBookingsProperty(): LengthAwarePaginator

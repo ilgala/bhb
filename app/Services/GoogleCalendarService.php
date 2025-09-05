@@ -11,7 +11,6 @@ use Google\Service\Calendar\Event as GoogleEvent;
 use Google\Service\Calendar\FreeBusyRequest;
 use Google\Service\Calendar\FreeBusyRequestItem;
 use Google\Service\Exception;
-use Illuminate\Support\Str;
 
 class GoogleCalendarService implements GoogleCalendarServiceContract
 {
@@ -23,32 +22,26 @@ class GoogleCalendarService implements GoogleCalendarServiceContract
 
     public function __construct()
     {
-        if (app()->isProduction()) {
-            $client = new GoogleClient;
-            $credentials = config('bhb.google.credentials_json');
-            if (is_string($credentials) && is_file($credentials)) {
-                $client->setAuthConfig($credentials);
-            } else {
-                $client->setAuthConfig(json_decode($credentials, true));
-            }
-
-            $client->setScopes([GoogleCalendar::CALENDAR]);
-            if ($subject = config('bhb.google.impersonate')) {
-                $client->setSubject($subject);
-            }
-
-            $this->calendar = new GoogleCalendar($client);
-            $this->calendarId = config('bhb.google.calendar_id', 'primary');
-            $this->tz = config('bhb.google.timezone', 'UTC');
+        $client = new GoogleClient;
+        $credentials = config('bhb.google.credentials_json');
+        if (is_string($credentials) && is_file($credentials)) {
+            $client->setAuthConfig($credentials);
+        } else {
+            $client->setAuthConfig(json_decode($credentials, true));
         }
+
+        $client->setScopes([GoogleCalendar::CALENDAR]);
+        if ($subject = config('bhb.google.impersonate')) {
+            $client->setSubject($subject);
+        }
+
+        $this->calendar = new GoogleCalendar($client);
+        $this->calendarId = config('bhb.google.calendar_id', 'primary');
+        $this->tz = config('bhb.google.timezone', 'UTC');
     }
 
     public function createEvent(Booking $booking): string
     {
-        if (app()->isLocal()) {
-            return Str::random(26).'@google.com';
-        }
-
         // RFC3339 datetimes with timezone
         $start = [
             'dateTime' => $this->rfc3339($booking->start_at),
@@ -83,10 +76,6 @@ class GoogleCalendarService implements GoogleCalendarServiceContract
 
     public function deleteEvent(?string $eventId): void
     {
-        if (app()->isLocal()) {
-            return;
-        }
-
         if (! $eventId) {
             return;
         }
@@ -102,10 +91,6 @@ class GoogleCalendarService implements GoogleCalendarServiceContract
 
     public function hasConflict(DateTimeInterface $start, DateTimeInterface $end): bool
     {
-        if (app()->isLocal()) {
-            return false;
-        }
-
         $req = new FreeBusyRequest;
         $req->setTimeMin($this->rfc3339($start));
         $req->setTimeMax($this->rfc3339($end));

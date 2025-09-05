@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Carbon;
 
 /**
@@ -76,4 +77,19 @@ class Booking extends Model
         'status' => BookingStatus::class,
         'approval_expires_at' => 'date',
     ];
+
+    public function audits(): MorphMany
+    {
+        return $this->morphMany(AuditLog::class, 'auditable')->latest();
+    }
+
+    public function isAccepted(): bool
+    {
+        return $this->status === BookingStatus::ACCEPTED;
+    }
+
+    public function isDeclined(): bool
+    {
+        return $this->status === BookingStatus::DECLINED;
+    }
 }

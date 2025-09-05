@@ -248,6 +248,43 @@
                     </div>
                 @endif
 
+                @if($selectedBooking)
+                    {{-- Activity (audits) --}}
+                    <div class="mt-6 rounded-2xl border">
+                        <div class="p-4">
+                            <flux:heading size="sm">Activity</flux:heading>
+
+                            @if ($selectedBooking->audits->isEmpty())
+                                <flux:text size="sm" class="mt-2">No activity yet.</flux:text>
+                            @else
+                                <ul class="mt-3 divide-y">
+                                    @foreach ($selectedBooking->audits as $audit)
+                                        <li class="py-3">
+                                            <div class="flex flex-col items-start justify-between gap-3">
+                                                <div class="w-full">
+                                                    <p class="text-sm font-medium">
+                                                        {{ ucfirst($audit->action) }}
+                                                    </p>
+                                                    <p class="mt-0.5 text-xs text-white">
+                                                        By: {{ optional($audit->user)->name ?? 'System' }}
+                                                    </p>
+
+                                                    @if (!empty($audit->metadata))
+                                                        <pre class="mt-2 max-h-40 overflow-auto rounded-lg p-2 text-[11px] leading-relaxed text-white bg-zinc-800/5 hover:bg-zinc-800/10 dark:bg-white/10 dark:hover:bg-white/20 dark:text-slate-300">{{ json_encode($audit->metadata, JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES) }}</pre>
+                                                    @endif
+                                                </div>
+
+                                                <p class="shrink-0 text-xs text-white">
+                                                    {{ $audit->created_at->diffForHumans() }}
+                                                </p>
+                                            </div>
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            @endif
+                        </div>
+                    </div>
+                @endif
             </div>
         </aside>
     </div>
