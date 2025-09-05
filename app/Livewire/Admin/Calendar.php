@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire;
+namespace App\Livewire\Admin;
 
 use App\Enums\BookingStatus;
 use App\Models\Booking;
@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 use Livewire\WithPagination;
 
-class AdminCalendar extends Component
+class Calendar extends Component
 {
     use WithPagination;
 
@@ -31,7 +31,7 @@ class AdminCalendar extends Component
 
     public function render(): View
     {
-        return view('livewire.admin-calendar', [
+        return view('livewire.admin.calendar', [
             'bookings' => $this->bookings,
             'selectedBooking' => $this->selectedBooking,
         ]);

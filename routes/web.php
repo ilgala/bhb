@@ -1,7 +1,8 @@
 <?php
 
 use App\Http\Controllers\ApprovalController;
-use App\Livewire\AdminCalendar;
+use App\Livewire\Admin\Calendar;
+use App\Livewire\Admin\UsersIndex;
 use App\Livewire\Availability;
 use App\Livewire\BookingForm;
 use App\Livewire\Settings\Appearance;
@@ -30,9 +31,10 @@ Route::middleware(['auth'])->group(function () {
         ->middleware(['auth', 'verified'])
         ->can('only-admin')
         ->group(function () {
-            Route::get('/calendar', AdminCalendar::class)->name('admin.calendar');
+            Route::get('/calendar', Calendar::class)->name('admin.calendar');
             // Route::get('/bookings/{booking}', BookingShow::class)->name('admin.bookings.show');
-            // Users CRUD (invite/revoke/deactivate)
+
+            Route::get('/users', UsersIndex::class)->name('admin.users');
         });
 });
 
